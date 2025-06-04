@@ -3,51 +3,51 @@ Deep-dive analysis project using Python on GAIL INDIA 5 year Data set
 
 Download Dataset from drive it's downloaded from NSE website "https://drive.google.com/drive/folders/1SkBg70Hve3W61jd56tzU8btZ1z7hpuUz?usp=drive_link"
 
-Install All required libraries
+**Install All required libraries**
 ```python
 !pip install pandas numpy matplotlib
 ```
-Import All required libraries
+**Import All required libraries**
 
 ```python
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 ```
-Read the Excel file and convert it into dataframe.
+**Read the Excel file and convert it into dataframe.**
 ```python
 df=pd.read_excel('/content/GAIL_2.xlsx')
 ```
-Remove all extra space from the column because it can be error when you forgot to write extra spaces.
+**Remove all extra space from the column because it can be error when you forgot to write extra spaces.**
 ```python
 df.columns = df.columns.str.replace(' ', '', regex=False)
 ```
-Checks all columns is spaces removed.
+**Checks all columns is spaces removed.**
 ```python
 print(df.columns)
 ```
-Checks all columns and data types to know Dataset
+**Checks all columns and data types to know Dataset**
 ```python
 df.info()
 ```
-Checks Duplicate data. Remove if any present.
+**Checks Duplicate data. Remove if any present.**
 ```python
 print(df.duplicated().sum())
 ```
-Adding one more column of day.
+**Adding one more column of day.**
 ```python
 df['day'] = df['Date'].dt.day_name()
 ```
-Remove the day which is Saturday or Sunday because Mostly theses days used for special trading.
+**Remove the day which is Saturday or Sunday because Mostly theses days used for special trading.**
 ```python
 df = df[~df['Date'].dt.day_name().isin(['Saturday', 'Sunday'])]
 ```
-Sorting, Reset index after sorting
+**Sorting, Reset index after sorting**
 ```python
 df = df.sort_values(by='Date', ascending=True)
 df = df.reset_index(drop=True)
 ```
---- RSI Calculation (14-day, using exponential moving average) ---
+**--- RSI Calculation (14-day, using exponential moving average) ---**
 
 ```python
 delta = df['close'].diff()
@@ -61,12 +61,12 @@ avg_loss = loss.ewm(alpha=1/14, adjust=False).mean()
 rs = avg_gain / avg_loss
 df['RSI'] = 100 - (100 / (1 + rs))
 ```
-Find the RSI value at lower than 30.
+**Find the RSI value at lower than 30.**
 ```python
 (df['RSI']<30).value_counts()
 df[df['RSI'] < 30]
 ```
-Get signal indices with the 10-day gap rule.(If i get any signal today then no signal for next 10- day)
+**Get signal indices with the 10-day gap rule.(If i get any signal today then no signal for next 10- day)**
 ```python
 signal_indices = []
 i = 0
@@ -77,7 +77,7 @@ while i < len(df):
     else:
         i += 1
 ```
-Generate 2D profit/loss array from day 3 to 20 and Convert to DataFrame.
+**Generate 2D profit/loss array from day 3 to 20 and Convert to DataFrame.**
 ```python
 holding_periods = range(3, 21)
 pl_matrix = []
@@ -96,7 +96,7 @@ for idx in signal_indices:
 pl_df = pd.DataFrame(pl_matrix, columns=[f'Day_{hp}' for hp in holding_periods])
 pl_df
 ```
-Summary of profit/Loss
+**Summary of profit/Loss**
 ```python
 summary = []
 
@@ -144,7 +144,7 @@ print(summary_df)
 
 ```
 
-Best holding period Calculation
+**Best holding period Calculation**
 ```python
 # Calculate average profit/loss per holding period (column-wise)
 avg_returns = pl_df.mean(skipna=True)
@@ -155,7 +155,7 @@ best_day_value = avg_returns.max()
 
 print(f"✅ Best holding period is: {best_day} with average return of {best_day_value:.2f}")
 ```
-All trades for Best holding period
+**All trades for Best holding period**
 ```python
 trades_Best = []
 
